@@ -27,6 +27,7 @@ The system consists of:
 ---
 
 ## Repository Structure
+```
 game2048/
 ├── cpp/              # C++ game engine and agents
 ├── python/           # ML training pipeline
@@ -34,6 +35,7 @@ game2048/
 ├── data/             # datasets (not tracked in git)
 ├── README.md
 └── .gitignore
+```
 
 
 ---
