@@ -1,0 +1,218 @@
+#include "Agent.h"
+
+double BoardEvaluator::count_empty_bonus(const Board& board) const {
+    return board.get_empty_count();
+}
+
+double BoardEvaluator::count_corner_bonus(const Board& board) const {
+    int max_pos = board.get_max_position();
+    int max_corner = 0;
+    if (max_pos == 0 || max_pos == 3 || max_pos == 12 || max_pos == 15) {
+        max_corner = 1;
+    }
+    return max_corner;
+}
+
+double BoardEvaluator::count_merge_bonus(const Board& board) const {
+    int mergeable = 0;
+
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            int cur = board.get_el(i, j);
+            if (cur == 0) continue;
+
+            if (board.get_el(i + 1, j) == cur) {
+                ++mergeable;
+            }
+            if (board.get_el(i, j + 1) == cur) {
+                ++mergeable;
+            }
+        }
+    }
+
+    return mergeable;
+}
+
+double BoardEvaluator::count_monotonicity_bonus(const Board& board) const {
+    int bonus = 0;
+
+    // rows
+    for (int i = 0; i < 4; ++i) {
+        int dec = 0;
+        int inc = 0;
+
+        for (int j = 0; j < 3; ++j) {
+            int a = board.get_el(i, j);
+            int b = board.get_el(i, j + 1);
+
+            if (a >= b) {
+                dec += a - b;
+            } else {
+                inc += b - a;
+            }
+        }
+
+        bonus += std::max(dec, inc);
+    }
+
+    // columns
+    for (int j = 0; j < 4; ++j) {
+        int dec = 0;
+        int inc = 0;
+
+        for (int i = 0; i < 3; ++i) {
+            int a = board.get_el(i, j);
+            int b = board.get_el(i + 1, j);
+
+            if (a >= b) {
+                dec += a - b;
+            } else {
+                inc += b - a;
+            }
+        }
+
+        bonus += std::max(dec, inc);
+    }
+
+    return bonus;
+}
+
+double BoardEvaluator::evaluate_board(const Board &board) const {
+    double evaluation = 300 * count_empty_bonus(board) + 100 * count_corner_bonus(board) + 70 * count_merge_bonus(board) + 0.5 * count_monotonicity_bonus(board);
+    return evaluation;
+}
+
+Direction RandomAgent::choose_move(const Board& board) {
+    auto moves = board.get_possible_moves();
+    if (moves.empty()) {
+        throw std::runtime_error("No possible moves");
+    }
+
+    std::uniform_int_distribution<> dist(0, moves.size() - 1);
+    return moves[dist(gen)];
+}
+
+Direction HeuristicAgent::choose_move(const Board& board) {
+    auto moves = board.get_possible_moves();
+    if (moves.empty()) {
+        throw std::runtime_error("No possible moves");
+    }
+
+    Direction best_move = moves[0];
+    double best_value = -1e18;
+
+    for (Direction d : moves) {
+        Board copy = board;
+        copy.apply_move_no_random(d);
+        double cur_value = evaluate(copy);
+
+        if (cur_value > best_value) {
+            best_value = cur_value;
+            best_move = d;
+        }
+    }
+
+    return best_move;
+}
+
+Direction ExpectimaxAgent::choose_move(const Board& board) {
+    cache.clear();
+    auto moves = board.get_possible_moves();
+    if (moves.empty()) {
+        throw std::runtime_error("No possible moves");
+    }
+
+    double best_value = -1e18;
+    Direction best_dir = moves[0];
+
+    for (Direction d : moves) {
+        Board copy = board;
+        copy.apply_move_no_random(d);
+        double cur_value = chance_value(copy, max_depth - 1);
+
+        if (cur_value > best_value) {
+            best_value = cur_value;
+            best_dir = d;
+        }
+    }
+
+    return best_dir;
+}
+
+double HeuristicAgent::evaluate(const Board& board) const {
+    return evaluator.evaluate_board(board);
+}
+
+std::string ExpectimaxAgent::make_key(const Board& board, int depth, bool is_chance) const {
+    std::string key;
+    key.reserve(64);
+
+    for (int i = 0; i < 16; ++i) {
+        key += std::to_string(board.get_el(i / 4, i % 4));
+        key += ',';
+    }
+
+    key += '|';
+    key += std::to_string(depth);
+    key += '|';
+    key += (is_chance ? 'C' : 'M');
+
+    return key;
+}
+
+double ExpectimaxAgent::evaluate(const Board& board) const {
+    return evaluator.evaluate_board(board);
+}
+
+double ExpectimaxAgent::max_value(const Board& board, int depth) const {
+    std::string key = make_key(board, depth, false);
+    auto it = cache.find(key);
+    if (it != cache.end()) {
+        return it->second;
+    }
+    std::vector<Direction> moves = board.get_possible_moves();
+    if (moves.empty()) {
+        double val = evaluate(board);
+        cache[key] = val;
+        return val;
+    }
+    double max_val = -1e18;
+    for (Direction d : moves) {
+        Board copy = board;
+        copy.apply_move_no_random(d);
+        max_val = std::max(max_val, chance_value(copy, depth));
+    }
+    cache[key] = max_val;
+    return max_val;
+}
+
+double ExpectimaxAgent::chance_value(const Board& board, int depth) const {
+    std::string key = make_key(board, depth, true);
+    auto it = cache.find(key);
+    if (it != cache.end()) {
+        return it->second;
+    }
+    std::vector<int> empty_cells = board.get_empty_cells();
+    int n = empty_cells.size();
+    if (depth == 0 || board.is_game_over() || n == 0) {
+        double val = evaluate(board);
+        cache[key] = val;
+        return val;
+    }
+    double ch_val = 0;
+    for (int i : empty_cells) {
+        Board copy2 = board;
+        copy2.place_tile(i, 2);
+        double eval2 = max_value(copy2, depth - 1);
+
+        /*Board copy4 = board;
+        copy4.place_tile(i, 4);
+        double eval4 = max_value(copy4, depth - 1);*/
+
+        ch_val += (1.0 * eval2) / n;
+
+    }
+
+    cache[key] = ch_val;
+    return ch_val;
+}
