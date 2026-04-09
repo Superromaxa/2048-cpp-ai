@@ -161,12 +161,13 @@ Both raw and log-transformed targets are evaluated.
 ## Experimental Results
 
 Best models ranked by validation RMSE:
+```
 hgb_extended_raw:     valid_rmse=5935.921, test_rmse=5828.937, spearman=0.5436
 ridge_extended_raw:   valid_rmse=6178.011, test_rmse=6093.105, spearman=0.4712
 ridge_base_raw:       valid_rmse=6308.182, test_rmse=6237.769, spearman=0.4026
 hgb_extended_log1p:   valid_rmse=6428.944, test_rmse=6300.286, spearman=0.5340
 ridge_extended_log1p: valid_rmse=6802.227, test_rmse=6663.695, spearman=0.4600
-
+```
 
 ### Observations
 
