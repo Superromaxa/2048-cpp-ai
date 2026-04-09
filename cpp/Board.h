@@ -15,6 +15,7 @@ class Board {
 private:
     std::array<int, 16> board = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     int score = 0;
+    int step = 0;
     std::mt19937 gen;
     std::uniform_int_distribution<> tile_dist;
 
@@ -39,6 +40,7 @@ public:
     void set_el(int e, size_t a, size_t b); // sets tile (a, b) value e
     void set_el(int e, size_t a); // sets tile a (numbered from 0 to 15) value e
     int get_score() const; // returns current score
+    int get_step() const; // returns current step
     int get_max_position() const; // returns the index (0-15) of the max tile on the board
     friend std::ostream& operator<<(std::ostream& os, const Board& b); // prints the board
     bool move(Direction d); // applies move in direction d and updates the board randomly adding a number

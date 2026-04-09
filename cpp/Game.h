@@ -8,7 +8,6 @@
 class Game {
 private:
     Board board;
-    int count_steps = 0;
 
     bool is_over() const;
     static bool try_parse_command(char c, Direction& d);

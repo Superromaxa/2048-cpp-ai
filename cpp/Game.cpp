@@ -18,13 +18,11 @@ bool Game::try_parse_command(char c, Direction& d) {
 
 void Game::start() {
     board = Board();
-    count_steps = 0;
     board.start();
 }
 
 bool Game::make_move(Direction d) {
     bool upd = board.move(d);
-    if (upd) ++count_steps;
     return upd;
 }
 
@@ -83,8 +81,8 @@ void Game::play_with_agent_and_collect(Agent& agent, Collector& collector, int g
     collector.start_game();
     int record_step = game_id % 2;
     while (!is_over()) {
-        if ((count_steps + record_step) % 2) {
-            collector.record_state(game_id, board, count_steps);
+        if ((board.get_step() + record_step) % 2) {
+            collector.record_state(game_id, board, board.get_step());
         }
         Direction d = agent.choose_move(board);
         make_move(d);

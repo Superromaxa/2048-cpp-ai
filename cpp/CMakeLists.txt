@@ -8,4 +8,5 @@ Board.cpp
 Game.cpp
 Agent.cpp
 Collector.cpp
-DataGenerator.cpp)
+DataGenerator.cpp
+Evaluators.cpp)

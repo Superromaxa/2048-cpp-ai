@@ -156,6 +156,10 @@ int Board::get_score() const {
     return score;
 }
 
+int Board::get_step() const {
+    return step;
+}
+
 int Board::get_max_position() const {
     int max = 0;
     int pos = -1;
@@ -170,7 +174,10 @@ int Board::get_max_position() const {
 
 bool Board::move(Direction d) {
     bool upd = apply_move(d);
-    if (upd) add_number();
+    if (upd) {
+        add_number();
+        ++step;
+    }
     return upd;
 }
 
@@ -181,6 +188,7 @@ void Board::start() {
 
 bool Board::apply_move_no_random(Direction d) {
     bool upd = apply_move(d);
+    if (upd) ++step;
     return upd;
 }
 

@@ -1,87 +1,5 @@
 #include "Agent.h"
 
-double BoardEvaluator::count_empty_bonus(const Board& board) const {
-    return board.get_empty_count();
-}
-
-double BoardEvaluator::count_corner_bonus(const Board& board) const {
-    int max_pos = board.get_max_position();
-    int max_corner = 0;
-    if (max_pos == 0 || max_pos == 3 || max_pos == 12 || max_pos == 15) {
-        max_corner = 1;
-    }
-    return max_corner;
-}
-
-double BoardEvaluator::count_merge_bonus(const Board& board) const {
-    int mergeable = 0;
-
-    for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            int cur = board.get_el(i, j);
-            if (cur == 0) continue;
-
-            if (board.get_el(i + 1, j) == cur) {
-                ++mergeable;
-            }
-            if (board.get_el(i, j + 1) == cur) {
-                ++mergeable;
-            }
-        }
-    }
-
-    return mergeable;
-}
-
-double BoardEvaluator::count_monotonicity_bonus(const Board& board) const {
-    int bonus = 0;
-
-    // rows
-    for (int i = 0; i < 4; ++i) {
-        int dec = 0;
-        int inc = 0;
-
-        for (int j = 0; j < 3; ++j) {
-            int a = board.get_el(i, j);
-            int b = board.get_el(i, j + 1);
-
-            if (a >= b) {
-                dec += a - b;
-            } else {
-                inc += b - a;
-            }
-        }
-
-        bonus += std::max(dec, inc);
-    }
-
-    // columns
-    for (int j = 0; j < 4; ++j) {
-        int dec = 0;
-        int inc = 0;
-
-        for (int i = 0; i < 3; ++i) {
-            int a = board.get_el(i, j);
-            int b = board.get_el(i + 1, j);
-
-            if (a >= b) {
-                dec += a - b;
-            } else {
-                inc += b - a;
-            }
-        }
-
-        bonus += std::max(dec, inc);
-    }
-
-    return bonus;
-}
-
-double BoardEvaluator::evaluate_board(const Board &board) const {
-    double evaluation = 300 * count_empty_bonus(board) + 100 * count_corner_bonus(board) + 70 * count_merge_bonus(board) + 0.5 * count_monotonicity_bonus(board);
-    return evaluation;
-}
-
 Direction RandomAgent::choose_move(const Board& board) {
     auto moves = board.get_possible_moves();
     if (moves.empty()) {
@@ -104,7 +22,7 @@ Direction HeuristicAgent::choose_move(const Board& board) {
     for (Direction d : moves) {
         Board copy = board;
         copy.apply_move_no_random(d);
-        double cur_value = evaluate(copy);
+        double cur_value = evaluator.evaluate_board(copy);
 
         if (cur_value > best_value) {
             best_value = cur_value;
@@ -145,7 +63,7 @@ double HeuristicAgent::evaluate(const Board& board) const {
 
 std::string ExpectimaxAgent::make_key(const Board& board, int depth, bool is_chance) const {
     std::string key;
-    key.reserve(64);
+    key.reserve(96);
 
     for (int i = 0; i < 16; ++i) {
         key += std::to_string(board.get_el(i / 4, i % 4));
@@ -153,12 +71,20 @@ std::string ExpectimaxAgent::make_key(const Board& board, int depth, bool is_cha
     }
 
     key += '|';
+    key += std::to_string(board.get_score());
+
+    key += '|';
+    key += std::to_string(board.get_step());
+
+    key += '|';
     key += std::to_string(depth);
+
     key += '|';
     key += (is_chance ? 'C' : 'M');
 
     return key;
 }
+
 
 double ExpectimaxAgent::evaluate(const Board& board) const {
     return evaluator.evaluate_board(board);
@@ -195,7 +121,7 @@ double ExpectimaxAgent::chance_value(const Board& board, int depth) const {
     std::vector<int> empty_cells = board.get_empty_cells();
     int n = empty_cells.size();
     if (depth == 0 || board.is_game_over() || n == 0) {
-        double val = evaluate(board);
+        double val = evaluator.evaluate_board(board);
         cache[key] = val;
         return val;
     }
