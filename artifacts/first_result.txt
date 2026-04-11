@@ -4,3 +4,6 @@ ridge_extended_raw: valid_rmse=6178.011, test_rmse=6093.105, test_spearman=0.471
 ridge_base_raw: valid_rmse=6308.182, test_rmse=6237.769, test_spearman=0.4026
 hgb_extended_log1p: valid_rmse=6428.944, test_rmse=6300.286, test_spearman=0.5340
 ridge_extended_log1p: valid_rmse=6802.227, test_rmse=6663.695, test_spearman=0.4600
+
+Heuristic Expectimax average score over 1000 games: 15707.8
+Linear Expectimax average score over 1000 games: 16343.4

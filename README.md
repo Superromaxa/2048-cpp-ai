@@ -3,12 +3,27 @@
 ## Overview
 
 This project implements the game **2048** in C++ with a modular architecture and extends it with artificial intelligence agents and a machine learning pipeline for learning a board evaluation function.
+The project combines a search-based AI (Expectimax) with a learned evaluation function trained on large-scale gameplay data, enabling measurable improvements over handcrafted heuristics.
 
-The system consists of:
-- a **C++ game engine** with multiple AI agents,
-- a **data generation pipeline** for collecting gameplay states,
-- a **Python-based ML pipeline** for training models,
-- and an integration path for replacing heuristic evaluation with a learned model.
+---
+
+## Results
+
+### Model performance
+
+| Model | Valid RMSE | Test RMSE | Spearman |
+|------|-----------|-----------|----------|
+| HGB (extended, raw) | 5935.9 | 5828.9 | 0.5436 |
+| Ridge (extended, raw) | 6178.0 | 6093.1 | 0.4712 |
+
+### Gameplay performance
+
+| Agent | Average Score (1000 games) |
+|------|---------------------------|
+| Heuristic Expectimax | 15707.8 |
+| ML-based Expectimax (Linear) | 16343.4 |
+
+The learned evaluation function improves the agent performance compared to the heuristic baseline.
 
 ---
 
@@ -36,7 +51,6 @@ game2048/
 ├── README.md
 └── .gitignore
 ```
-
 
 ---
 
@@ -160,25 +174,6 @@ Both raw and log-transformed targets are evaluated.
 
 ---
 
-## Experimental Results
-
-Best models ranked by validation RMSE:
-```
-hgb_extended_raw:     valid_rmse=5935.921, test_rmse=5828.937, spearman=0.5436
-ridge_extended_raw:   valid_rmse=6178.011, test_rmse=6093.105, spearman=0.4712
-ridge_base_raw:       valid_rmse=6308.182, test_rmse=6237.769, spearman=0.4026
-hgb_extended_log1p:   valid_rmse=6428.944, test_rmse=6300.286, spearman=0.5340
-ridge_extended_log1p: valid_rmse=6802.227, test_rmse=6663.695, spearman=0.4600
-```
-
-### Observations
-
-- Gradient boosting significantly outperforms linear models  
-- Extended feature set improves performance across all models  
-- Spearman correlation indicates moderate ranking quality of predicted states  
-
----
-
 ## Model Export
 
 The best linear model is exported as:
@@ -212,6 +207,44 @@ This enables integration into the C++ Expectimax agent as a learned evaluation f
 
 ---
 
+## Entry Points
+
+- `main_collect_data.cpp`  
+  Generates training data by running multiple games with different agents and saving states to CSV.
+
+- `main_compare.cpp`  
+  Runs multiple games and compares different evaluation strategies (heuristic vs ML-based).
+
+---
+
+## How to run
+
+### Build C++ engine
+
+```bash
+cd cpp
+mkdir build && cd build
+cmake ..
+make```
+
+### Collect dataset
+
+```./collect_data```
+
+### Train model (Python)
+
+```cd ../../python
+python train_models.py```
+
+### Compare agents
+
+```./compare```
+
+### Note
+The program automatically resolves project root, so it can be run from any directory.
+
+---
+
 ## Summary
 
 This project implements a full pipeline:
@@ -221,4 +254,5 @@ This project implements a full pipeline:
 - supervised learning of value functions  
 - evaluation and model comparison  
 
-The approach combines classical search (Expectimax) with data-driven evaluation, providing a foundation for improving gameplay performance.
+Unlike standard implementations, this project replaces handcrafted evaluation in Expectimax with a learned value function trained from gameplay data, demonstrating improved decision quality.
+
