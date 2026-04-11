@@ -225,20 +225,21 @@ This enables integration into the C++ Expectimax agent as a learned evaluation f
 cd cpp
 mkdir build && cd build
 cmake ..
-make```
+make
+```
 
 ### Collect dataset
 
-```./collect_data```
+./collect_data
 
 ### Train model (Python)
 
-```cd ../../python
-python train_models.py```
+cd ../../python
+python train_models.py
 
 ### Compare agents
 
-```./compare```
+./compare
 
 ### Note
 The program automatically resolves project root, so it can be run from any directory.
