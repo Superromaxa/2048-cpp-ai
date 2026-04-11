@@ -186,11 +186,9 @@ This enables integration into the C++ Expectimax agent as a learned evaluation f
 
 ## Future Work
 
-- Integrate trained model into Expectimax evaluation  
-- Compare gameplay performance vs heuristic evaluation  
-- Explore ranking-based objectives instead of regression  
-- Add neural network baseline  
-- Optimize inference speed in C++  
+- Integrate non-linear models (e.g. gradient boosting) into the C++ agent with efficient inference  
+- Improve feature representation to better capture board structure and symmetries  
+- Investigate why improvements in RMSE do not always translate into proportional gameplay gains  
 
 ---
 
@@ -230,16 +228,22 @@ make
 
 ### Collect dataset
 
+```
 ./collect_data
+```
 
 ### Train model (Python)
 
+```
 cd ../../python
 python train_models.py
+```
 
 ### Compare agents
 
+```
 ./compare
+```
 
 ### Note
 The program automatically resolves project root, so it can be run from any directory.
