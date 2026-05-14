@@ -1,0 +1,4 @@
+agent_a,agent_b,n_games_a,n_games_b,mean_score_a,mean_score_b,mean_score_diff_a_minus_b,ttest_p_value,mannwhitney_p_value
+expectimax,heuristic,3000,3000,15400.513333333334,4512.388,10888.125333333333,0.0,0.0
+expectimax,random,3000,3000,15400.513333333334,1006.0653333333333,14394.448,0.0,0.0
+heuristic,random,3000,3000,4512.388,1006.0653333333333,3506.3226666666665,0.0,0.0

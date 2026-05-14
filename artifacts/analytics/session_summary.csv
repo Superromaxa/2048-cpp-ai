@@ -1,0 +1,4 @@
+agent,n_sessions,expected_final_score,median_final_score,expected_session_length,median_session_length,mean_max_tile,median_max_tile
+expectimax,3000,15400.513333333334,15398.0,826.234,841.0,1108.224,1024.0
+heuristic,3000,4512.388,4232.0,310.2153333333333,298.0,351.76533333333333,256.0
+random,3000,1006.0653333333333,960.0,103.89933333333333,100.0,101.67466666666667,128.0
